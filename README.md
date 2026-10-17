@@ -89,3 +89,62 @@ O projeto está 100% configurado para o padrão Vite + React da Vercel.
    vercel
    ```
 3. Siga as instruções no terminal para publicar.
+
+---
+
+## 🚀 Como Executar Localmente
+
+1. Acesse o diretório do projeto:
+   ```bash
+   cd agenda-pessoal
+   ```
+
+2. Instale as dependências (se ainda não o fez):
+   ```bash
+   npm install
+   ```
+
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+
+4. Abra no navegador o endereço exibido no terminal (geralmente `http://localhost:5173`).
+
+---
+
+## 🌐 Como Subir para a Vercel
+
+O projeto está 100% configurado para o padrão Vite + React da Vercel.
+
+### Opção 1: Via GitHub (Recomendado)
+1. Crie um repositório no seu GitHub.
+2. Faça o push do projeto:
+   ```bash
+   git init
+   git add .
+   git commit -m "feat: agenda pessoal react app"
+   git branch -M main
+   git remote add origin https://github.com/SEU_USUARIO/agenda-pessoal.git
+   git push -u origin main
+   ```
+3. Acesse [vercel.com](https://vercel.com) e faça login.
+4. Clique em **"Add New..."** > **"Project"**.
+5. Importe o repositório da sua agenda.
+6. A Vercel detectará automaticamente as configurações do Vite:
+   - **Framework Preset:** Vite
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+7. Clique em **Deploy**! Em poucos segundos sua agenda estará no ar com link público HTTPS.
+
+### Opção 2: Via Vercel CLI
+1. Instale a CLI globalmente:
+   ```bash
+   npm i -g vercel
+   ```
+2. Na pasta do projeto, execute:
+   ```bash
+   vercel
+   ```
+3. Siga as instruções no terminal para publicar.
+

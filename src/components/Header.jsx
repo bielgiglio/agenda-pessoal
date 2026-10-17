@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar as CalendarIcon, Plus, ChevronLeft, ChevronRight, Home, Sun } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, ChevronLeft, ChevronRight, LogOut, User } from 'lucide-react';
 import { formatDateExtended, isToday, addDays, formatToDateInput } from '../utils/dateUtils';
 
 export default function Header({
@@ -8,7 +8,10 @@ export default function Header({
   selectedDate,
   setSelectedDate,
   onOpenNewReminder,
-  dayRemindersCount = { total: 0, completed: 0 }
+  dayRemindersCount = { total: 0, completed: 0 },
+  onLogout,
+  onOpenProfile,
+  user
 }) {
   const isSelectedToday = isToday(selectedDate);
 
@@ -96,27 +99,51 @@ export default function Header({
                 </button>
               </div>
             </div>
-          ) : (
-            <div className="calendar-header-title">
-              <h1 className="date-title">Visão Geral Mensal</h1>
-              <p className="date-sub">Clique em qualquer data para ver ou agendar compromissos</p>
-            </div>
-          )}
+          ) : null}
         </div>
 
-        {/* Canto Superior Direito: Botão + para adicionar novos lembretes */}
+        {/* Canto Superior Direito: Botão +, Perfil e Logout */}
         <div className="header-right">
           <button
             type="button"
             className="btn btn-add"
             onClick={onOpenNewReminder}
-            title="Adicionar novo lembrete"
+            title="Adicionar novo evento"
           >
-            <Plus size={22} className="plus-icon" />
+            <Plus size={20} className="plus-icon" />
             <span className="btn-text-add">Novo</span>
           </button>
+
+          {onOpenProfile && (
+            <button
+              type="button"
+              className="btn btn-profile"
+              onClick={onOpenProfile}
+              title="Meu Perfil e Configurações da Conta"
+              aria-label="Meu Perfil"
+            >
+              <User size={18} />
+              <span className="btn-text-profile">
+                {user?.user_metadata?.nome || user?.user_metadata?.name || 'Perfil'}
+              </span>
+            </button>
+          )}
+
+          {onLogout && (
+            <button
+              type="button"
+              className="btn btn-logout"
+              onClick={onLogout}
+              title={user?.email ? `Desconectar (${user.email})` : 'Encerrar sessão'}
+              aria-label="Encerrar sessão"
+            >
+              <LogOut size={18} />
+              <span className="btn-text-logout">Sair</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
   );
 }
+

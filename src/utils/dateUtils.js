@@ -72,3 +72,52 @@ export function addDays(dateStr, days) {
 export function isToday(dateStr) {
   return dateStr === formatToDateInput(new Date());
 }
+
+// Retorna o dia da semana (0 = Domingo ... 6 = Sábado) de uma string YYYY-MM-DD
+export function getDayOfWeekFromDate(dateStr) {
+  const date = parseDateInput(dateStr);
+  return date.getDay();
+}
+
+// Formata lista de dias da semana para exibição amigável: [1, 3, 5] -> "Seg, Qua e Sex"
+export function formatDiasSemanaResumo(dias = []) {
+  if (!dias || dias.length === 0) return '';
+  const ordenados = [...dias].sort((a, b) => a - b);
+  if (ordenados.length === 7) return 'Todos os dias';
+  if (ordenados.length === 5 && ordenados.every((d, i) => d === i + 1)) return 'Segunda a Sexta';
+  if (ordenados.length === 2 && ordenados.includes(0) && ordenados.includes(6)) return 'Fins de semana';
+
+  const nomes = ordenados.map((d) => DIAS_DA_SEMANA_ABREV[d]);
+  if (nomes.length === 1) return DIAS_DA_SEMANA[ordenados[0]];
+  if (nomes.length === 2) return `${nomes[0]} e ${nomes[1]}`;
+  return `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}`;
+}
+
+// Verifica se um evento se aplica a uma determinada data (considerando recorrência semanal para múltiplos dias)
+export function isEventMatchingDate(event, dateStr) {
+  if (!event) return false;
+  if (event.recorrente) {
+    const dayOfWeek = getDayOfWeekFromDate(dateStr);
+    // Suporta array dias_semana
+    if (Array.isArray(event.dias_semana) && event.dias_semana.length > 0) {
+      return event.dias_semana.map(Number).includes(dayOfWeek);
+    }
+    // Fallback retroativo para dia_semana singular
+    if (event.dia_semana !== null && event.dia_semana !== undefined) {
+      return Number(event.dia_semana) === dayOfWeek;
+    }
+    return false;
+  }
+  return event.date === dateStr;
+}
+
+// Projeta o evento para uma determinada data caso seja recorrente
+export function projectEventForDate(event, dateStr) {
+  if (!event || !event.recorrente) return event;
+  return {
+    ...event,
+    date: dateStr,
+    time: event.horario_recorrente || event.time || ''
+  };
+}
+

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import ReminderItem from './ReminderItem';
-import { CalendarCheck2, PlusCircle, CheckCircle2, Clock } from 'lucide-react';
+import { CalendarCheck2, PlusCircle } from 'lucide-react';
 
 export default function ReminderList({
   reminders,
-  selectedDate,
+  selectedDate: _selectedDate,
   onToggleComplete,
   onEdit,
   onDelete,
@@ -101,3 +101,4 @@ export default function ReminderList({
     </section>
   );
 }
+

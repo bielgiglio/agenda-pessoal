@@ -2,29 +2,56 @@ import { formatToDateInput, addDays } from './dateUtils';
 
 const STORAGE_KEY = 'agenda_pessoal_reminders_v1';
 
-export const IMPORTANCE_LEVELS = {
-  verde: {
-    id: 'verde',
-    label: 'Baixa / Normal',
+export const PRIORIDADE_OPTIONS = [
+  {
+    id: 'baixa',
+    label: 'Baixa',
+    subLabel: 'Normal',
     colorName: 'Verde',
     colorHex: '#10b981',
-    badgeClass: 'tag-green'
+    badgeClass: 'tag-green',
+    optClass: 'opt-verde'
   },
-  amarelo: {
-    id: 'amarelo',
-    label: 'Média / Importante',
+  {
+    id: 'media',
+    label: 'Média',
+    subLabel: 'Importante',
     colorName: 'Amarelo',
     colorHex: '#f59e0b',
-    badgeClass: 'tag-yellow'
+    badgeClass: 'tag-yellow',
+    optClass: 'opt-amarelo'
   },
-  vermelho: {
-    id: 'vermelho',
-    label: 'Alta / Urgente',
+  {
+    id: 'alta',
+    label: 'Alta',
+    subLabel: 'Urgente',
     colorName: 'Vermelho',
     colorHex: '#ef4444',
-    badgeClass: 'tag-red'
+    badgeClass: 'tag-red',
+    optClass: 'opt-vermelho'
   }
+];
+
+export const PRIORIDADE_MAP = PRIORIDADE_OPTIONS.reduce((acc, curr) => {
+  acc[curr.id] = curr;
+  return acc;
+}, {});
+
+export const IMPORTANCE_LEVELS = {
+  ...PRIORIDADE_MAP,
+  verde: PRIORIDADE_MAP.baixa,
+  amarelo: PRIORIDADE_MAP.media,
+  vermelho: PRIORIDADE_MAP.alta
 };
+
+export function normalizarPrioridade(valor) {
+  if (!valor) return 'baixa';
+  const v = String(valor).toLowerCase().trim();
+  if (v === 'verde' || v === 'baixa') return 'baixa';
+  if (v === 'amarelo' || v === 'media' || v === 'média') return 'media';
+  if (v === 'vermelho' || v === 'alta') return 'alta';
+  return 'baixa';
+}
 
 export function getInitialReminders() {
   const today = formatToDateInput(new Date());
@@ -117,3 +144,4 @@ export function saveReminders(reminders) {
     console.error('Erro ao salvar no localStorage:', err);
   }
 }
+

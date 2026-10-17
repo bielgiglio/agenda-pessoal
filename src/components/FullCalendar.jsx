@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar as CalendarIcon,
   Plus,
   ArrowRight,
-  CheckCircle2,
-  Clock
+  Clock,
+  Repeat
 } from 'lucide-react';
 import {
   MESES,
   DIAS_DA_SEMANA_ABREV,
   formatToDateInput,
   isToday,
-  formatDateExtended
+  formatDateExtended,
+  getDayOfWeekFromDate,
+  projectEventForDate,
+  isEventMatchingDate
 } from '../utils/dateUtils';
 import { IMPORTANCE_LEVELS } from '../utils/storage';
 
@@ -99,12 +101,23 @@ export default function FullCalendar({
 
   const allCalendarDays = [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
 
-  // Agrupamento de lembretes por data
-  const remindersByDate = reminders.reduce((acc, rem) => {
-    if (!acc[rem.date]) acc[rem.date] = [];
-    acc[rem.date].push(rem);
-    return acc;
-  }, {});
+  // Agrupamento de lembretes por data (projetando eventos recorrentes em todas as semanas correspondentes)
+  const remindersByDate = {};
+  allCalendarDays.forEach((cell) => {
+    remindersByDate[cell.dateStr] = [];
+  });
+  if (selectedDate && !remindersByDate[selectedDate]) {
+    remindersByDate[selectedDate] = [];
+  }
+
+  Object.keys(remindersByDate).forEach((dateStr) => {
+    const dayEvents = reminders
+      .filter((rem) => isEventMatchingDate(rem, dateStr))
+      .map((rem) => projectEventForDate(rem, dateStr))
+      .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+    remindersByDate[dateStr] = dayEvents;
+  });
 
   // Lembretes do dia selecionado para prévia
   const selectedDayReminders = remindersByDate[selectedDate] || [];
@@ -166,11 +179,6 @@ export default function FullCalendar({
             const isTodayCell = isToday(cell.dateStr);
             const isSelectedCell = cell.dateStr === selectedDate;
 
-            // Contagem de prioridades
-            const greenCount = cellReminders.filter((r) => r.importance === 'verde').length;
-            const yellowCount = cellReminders.filter((r) => r.importance === 'amarelo').length;
-            const redCount = cellReminders.filter((r) => r.importance === 'vermelho').length;
-
             return (
               <div
                 key={idx}
@@ -190,17 +198,23 @@ export default function FullCalendar({
                   )}
                 </div>
 
-                {/* Pontos de Lembretes com cores da etiqueta */}
+                {/* Pontos de Lembretes com cores da prioridade (ou cinza se concluído) */}
                 <div className="cell-dots-wrapper">
                   {cellReminders.slice(0, 4).map((rem, rIdx) => {
-                    const color =
-                      IMPORTANCE_LEVELS[rem.importance]?.colorHex || '#10b981';
+                    const isConcluido = Boolean(rem.concluido ?? rem.completed);
+                    const prioridadeKey = rem.prioridade || rem.importance || 'baixa';
+                    const color = isConcluido
+                      ? '#94a3b8' // Cinza para eventos concluídos
+                      : IMPORTANCE_LEVELS[prioridadeKey]?.colorHex || '#10b981';
+
                     return (
                       <span
                         key={rIdx}
-                        className="reminder-dot-indicator"
+                        className={`reminder-dot-indicator ${isConcluido ? 'is-completed-dot' : ''}`}
                         style={{ backgroundColor: color }}
-                        title={`${rem.time ? rem.time + ' - ' : ''}${rem.title}`}
+                        title={`${rem.time ? rem.time + ' - ' : ''}${rem.title}${
+                          isConcluido ? ' (Concluído)' : ''
+                        }`}
                       />
                     );
                   })}
@@ -247,12 +261,14 @@ export default function FullCalendar({
           ) : (
             <div className="preview-items-list">
               {selectedDayReminders.map((rem) => {
-                const info = IMPORTANCE_LEVELS[rem.importance] || IMPORTANCE_LEVELS.verde;
+                const isConcluido = Boolean(rem.concluido ?? rem.completed);
+                const prioridadeKey = rem.prioridade || rem.importance || 'baixa';
+                const info = IMPORTANCE_LEVELS[prioridadeKey] || IMPORTANCE_LEVELS.baixa;
                 return (
-                  <div key={rem.id} className="preview-item">
+                  <div key={rem.id} className={`preview-item ${isConcluido ? 'is-completed' : ''}`}>
                     <span
                       className="preview-bullet"
-                      style={{ backgroundColor: info.colorHex }}
+                      style={{ backgroundColor: isConcluido ? '#94a3b8' : info.colorHex }}
                     />
                     {rem.time && (
                       <span className="preview-time">
@@ -260,8 +276,11 @@ export default function FullCalendar({
                         {rem.time}
                       </span>
                     )}
-                    <span className={`preview-title ${rem.completed ? 'completed' : ''}`}>
-                      {rem.title}
+                    <span className={`preview-title ${isConcluido ? 'completed' : ''}`}>
+                      {rem.recorrente && (
+                        <Repeat size={13} className="preview-repeat-icon" title="Evento semanal fixo" />
+                      )}
+                      <span>{rem.title}</span>
                     </span>
                     <span className={`preview-badge ${info.badgeClass}`}>{info.label}</span>
                   </div>
@@ -274,3 +293,4 @@ export default function FullCalendar({
     </div>
   );
 }
+
