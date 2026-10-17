@@ -18,7 +18,7 @@ import {
   isEventMatchingDate,
   projectEventForDate
 } from './utils/dateUtils';
-import { AlertCircle, RefreshCw, Calendar } from 'lucide-react';
+import { AlertCircle, RefreshCw, Calendar, Plus } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -37,6 +37,40 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState(null);
+
+  // Estado compartilhado do Mês e Ano do Calendário
+  const [currentYear, setCurrentYear] = useState(() => {
+    const d = new Date(selectedDate ? `${selectedDate}T12:00:00` : new Date());
+    return d.getFullYear();
+  });
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const d = new Date(selectedDate ? `${selectedDate}T12:00:00` : new Date());
+    return d.getMonth();
+  });
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear((y) => y - 1);
+    } else {
+      setCurrentMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear((y) => y + 1);
+    } else {
+      setCurrentMonth((m) => m + 1);
+    }
+  };
+
+  const handleGoToCurrentMonth = () => {
+    const now = new Date();
+    setCurrentYear(now.getFullYear());
+    setCurrentMonth(now.getMonth());
+  };
 
   // 1. Monitora a sessão de autenticação do Supabase
   useEffect(() => {
@@ -233,7 +267,7 @@ export default function App() {
 
   return (
     <div className="agenda-app">
-      {/* Topo fixo com navegação, data, botão de novo evento e botão de Logout */}
+      {/* Topo fixo com navegação, data, botão de novo evento e menu do usuário */}
       <Header
         viewMode={viewMode}
         setViewMode={setViewMode}
@@ -247,6 +281,11 @@ export default function App() {
         onLogout={handleLogout}
         onOpenProfile={() => setIsProfileOpen(true)}
         user={session.user}
+        currentMonth={currentMonth}
+        currentYear={currentYear}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+        onGoToCurrentMonth={handleGoToCurrentMonth}
       />
 
       {/* Conteúdo Principal */}
@@ -291,10 +330,25 @@ export default function App() {
               selectedDate={selectedDate}
               onSelectDateAndGoToDay={handleSelectDateFromCalendar}
               onOpenNewReminderForDate={handleOpenNewReminderForDate}
+              currentMonth={currentMonth}
+              currentYear={currentYear}
             />
           )}
         </div>
       </main>
+
+      {/* Botão Flutuante (FAB) para Mobile no Modo Diário */}
+      {viewMode === 'day' && (
+        <button
+          type="button"
+          className="mobile-fab-btn"
+          onClick={handleOpenNewReminder}
+          title="Adicionar novo compromisso"
+          aria-label="Adicionar novo compromisso"
+        >
+          <Plus size={26} />
+        </button>
+      )}
 
       {/* Modal de Criação / Edição de Eventos */}
       <ReminderModal

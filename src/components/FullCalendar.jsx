@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  ChevronLeft,
-  ChevronRight,
   Plus,
   ArrowRight,
   Clock,
@@ -13,7 +11,6 @@ import {
   formatToDateInput,
   isToday,
   formatDateExtended,
-  getDayOfWeekFromDate,
   projectEventForDate,
   isEventMatchingDate
 } from '../utils/dateUtils';
@@ -23,44 +20,32 @@ export default function FullCalendar({
   reminders,
   selectedDate,
   onSelectDateAndGoToDay,
-  onOpenNewReminderForDate
+  onOpenNewReminderForDate,
+  currentYear: propCurrentYear,
+  currentMonth: propCurrentMonth
 }) {
-  // Inicializa o mês/ano com base no selectedDate
-  const [currentYear, setCurrentYear] = useState(() => {
+  // Inicializa o mês/ano com base no prop ou no selectedDate
+  const [internalYear, setInternalYear] = useState(() => {
     const d = new Date(selectedDate ? `${selectedDate}T12:00:00` : new Date());
     return d.getFullYear();
   });
 
-  const [currentMonth, setCurrentMonth] = useState(() => {
+  const [internalMonth, setInternalMonth] = useState(() => {
     const d = new Date(selectedDate ? `${selectedDate}T12:00:00` : new Date());
     return d.getMonth();
   });
 
-  // Mês anterior
-  const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear((y) => y - 1);
-    } else {
-      setCurrentMonth((m) => m - 1);
-    }
-  };
+  const currentYear = propCurrentYear !== undefined ? propCurrentYear : internalYear;
+  const currentMonth = propCurrentMonth !== undefined ? propCurrentMonth : internalMonth;
 
-  // Próximo mês
-  const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear((y) => y + 1);
-    } else {
-      setCurrentMonth((m) => m + 1);
+  // Sincroniza estado interno se o selectedDate mudar e não estiver sob controle de props
+  useEffect(() => {
+    if (propCurrentYear === undefined && selectedDate) {
+      const d = new Date(`${selectedDate}T12:00:00`);
+      setInternalYear(d.getFullYear());
+      setInternalMonth(d.getMonth());
     }
-  };
-
-  const handleGoToCurrentMonth = () => {
-    const now = new Date();
-    setCurrentYear(now.getFullYear());
-    setCurrentMonth(now.getMonth());
-  };
+  }, [selectedDate, propCurrentYear]);
 
   // Cálculo da grade do mês
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
@@ -87,7 +72,7 @@ export default function FullCalendar({
     });
   }
 
-  // Dias do próximo mês para completar a grade (42 células = 6 semanas)
+  // Dias do próximo mês para completar a grade (42 células = 6 semanas ou 35 células = 5 semanas)
   const totalCellsSoFar = prevMonthDays.length + currentMonthDays.length;
   const nextMonthDays = [];
   const cellsNeeded = totalCellsSoFar > 35 ? 42 : 35;
@@ -101,7 +86,7 @@ export default function FullCalendar({
 
   const allCalendarDays = [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
 
-  // Agrupamento de lembretes por data (projetando eventos recorrentes em todas as semanas correspondentes)
+  // Agrupamento de lembretes por data (projetando eventos fixos/recorrentes em todas as semanas correspondentes)
   const remindersByDate = {};
   allCalendarDays.forEach((cell) => {
     remindersByDate[cell.dateStr] = [];
@@ -124,44 +109,7 @@ export default function FullCalendar({
 
   return (
     <div className="full-calendar-wrapper">
-      {/* Barra superior de navegação do calendário */}
-      <div className="calendar-controls">
-        <div className="calendar-month-heading">
-          <h2>
-            {MESES[currentMonth]} <span className="year-text">{currentYear}</span>
-          </h2>
-        </div>
-
-        <div className="calendar-nav-buttons">
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={handleGoToCurrentMonth}
-          >
-            Mês Atual
-          </button>
-          <div className="arrow-btn-group">
-            <button
-              type="button"
-              className="nav-arrow"
-              onClick={handlePrevMonth}
-              title="Mês anterior"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              type="button"
-              className="nav-arrow"
-              onClick={handleNextMonth}
-              title="Próximo mês"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid de Dias */}
+      {/* Grid de Dias do Calendário */}
       <div className="calendar-grid-card">
         {/* Cabeçalho dos dias da semana */}
         <div className="calendar-weekdays-row">
@@ -172,7 +120,7 @@ export default function FullCalendar({
           ))}
         </div>
 
-        {/* Células de dias */}
+        {/* Células de dias com altura ampliada, números centralizados e bolinhas alinhadas */}
         <div className="calendar-days-grid">
           {allCalendarDays.map((cell, idx) => {
             const cellReminders = remindersByDate[cell.dateStr] || [];
@@ -187,24 +135,22 @@ export default function FullCalendar({
                 } ${isSelectedCell ? 'is-selected' : ''}`}
                 onClick={() => onSelectDateAndGoToDay(cell.dateStr, false)}
                 onDoubleClick={() => onSelectDateAndGoToDay(cell.dateStr, true)}
-                title={`Clique para selecionar, clique duplo para abrir o dia (${cell.dateStr})`}
+                title={`Clique para selecionar, toque duplo para abrir o dia (${cell.dateStr})`}
               >
-                <div className="cell-top">
+                {/* Número do dia centralizado */}
+                <div className="cell-number-wrapper">
                   <span className={`cell-day-number ${isTodayCell ? 'today-pill' : ''}`}>
                     {cell.day}
                   </span>
-                  {cellReminders.length > 0 && (
-                    <span className="cell-count-badge">{cellReminders.length}</span>
-                  )}
                 </div>
 
-                {/* Pontos de Lembretes com cores da prioridade (ou cinza se concluído) */}
+                {/* Bolinhas de status logo abaixo do número com espaçamento harmonioso */}
                 <div className="cell-dots-wrapper">
-                  {cellReminders.slice(0, 4).map((rem, rIdx) => {
+                  {cellReminders.slice(0, 3).map((rem, rIdx) => {
                     const isConcluido = Boolean(rem.concluido ?? rem.completed);
                     const prioridadeKey = rem.prioridade || rem.importance || 'baixa';
                     const color = isConcluido
-                      ? '#94a3b8' // Cinza para eventos concluídos
+                      ? '#94a3b8' // Cinza se concluído
                       : IMPORTANCE_LEVELS[prioridadeKey]?.colorHex || '#10b981';
 
                     return (
@@ -218,8 +164,8 @@ export default function FullCalendar({
                       />
                     );
                   })}
-                  {cellReminders.length > 4 && (
-                    <span className="dot-plus">+{cellReminders.length - 4}</span>
+                  {cellReminders.length > 3 && (
+                    <span className="dot-plus">+{cellReminders.length - 3}</span>
                   )}
                 </div>
               </div>
@@ -228,29 +174,37 @@ export default function FullCalendar({
         </div>
       </div>
 
-      {/* Painel lateral/inferior de resumo do dia selecionado */}
+      {/* Card de "Dia Selecionado" no Calendário (Botões empilhados/destacados com min 44px) */}
       <div className="calendar-day-preview-card">
         <div className="preview-header">
-          <div>
-            <span className="preview-label">Dia Selecionado:</span>
+          <div className="preview-header-info">
+            <span className="preview-label">Dia Selecionado</span>
             <h3 className="preview-date-title">{formatDateExtended(selectedDate)}</h3>
+            <span className="preview-task-count">
+              {selectedDayReminders.length === 0
+                ? 'Nenhum compromisso para este dia'
+                : `${selectedDayReminders.length} compromisso${
+                    selectedDayReminders.length > 1 ? 's' : ''
+                  }`}
+            </span>
           </div>
+
           <div className="preview-actions">
             <button
               type="button"
-              className="btn btn-outline btn-sm"
+              className="btn btn-primary btn-preview-primary"
               onClick={() => onOpenNewReminderForDate(selectedDate)}
             >
-              <Plus size={16} />
+              <Plus size={18} />
               <span>Adicionar Neste Dia</span>
             </button>
             <button
               type="button"
-              className="btn btn-primary btn-sm"
+              className="btn btn-outline btn-preview-secondary"
               onClick={() => onSelectDateAndGoToDay(selectedDate, true)}
             >
               <span>Ver Lista do Dia</span>
-              <ArrowRight size={16} />
+              <ArrowRight size={18} />
             </button>
           </div>
         </div>
@@ -293,4 +247,3 @@ export default function FullCalendar({
     </div>
   );
 }
-

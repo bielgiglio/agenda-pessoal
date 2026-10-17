@@ -1,58 +1,224 @@
 /* Layout Geral do App */
 .agenda-app {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: #f8fafc;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
-/* Header Fixo e Elegante */
+/* Header Fixo e Elegante com Suporte a Safe Area do iOS */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  background-color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid #e2e8f0;
-  padding: 14px 20px;
+  padding: max(14px, env(safe-area-inset-top, 14px)) max(16px, env(safe-area-inset-right, 16px)) 12px max(16px, env(safe-area-inset-left, 16px));
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  width: 100%;
 }
 
 .header-container {
   max-width: 960px;
   margin: 0 auto;
+  width: 100%;
+}
+
+/* ==========================================================
+   VISÃO DIÁRIA: 2 LINHAS LIMPAS
+   ========================================================== */
+.day-header-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Linha 1: Barra de Ação (Esquerda: Voltar/Calendário | Direita: + Novo & Menu do Usuário) */
+.header-action-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  width: 100%;
+  gap: 12px;
 }
 
-/* Canto Superior Esquerdo */
-.header-left {
-  flex: 1;
+.header-action-left {
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Centro: Navegador de Data */
-.header-center {
-  flex: 2;
+.btn-header-calendar {
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 10px;
+  min-height: 38px;
+}
+
+.header-action-right {
   display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-header-add {
+  min-height: 38px;
+  padding: 7px 16px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+/* Linha 2: Navegação de Data Centralizada */
+.header-date-row {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  text-align: center;
+  gap: 10px;
+  width: 100%;
+  padding-top: 2px;
 }
 
+
+
+/* ==========================================================
+   MENU COMPACTO DO USUÁRIO (DROPDOWN iOS-LIKE)
+   ========================================================== */
+.user-menu-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.user-avatar-btn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.user-avatar-btn:hover,
+.user-avatar-btn.is-active {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+}
+
+.user-avatar-initial {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.user-dropdown-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  width: 220px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(0, 0, 0, 0.05);
+  padding: 6px;
+  animation: dropdownIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.user-dropdown-header {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-dropdown-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-dropdown-email {
+  font-size: 0.72rem;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 4px 0;
+}
+
+.user-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+
+.user-dropdown-item:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.user-dropdown-item.item-danger {
+  color: #ef4444;
+}
+
+.user-dropdown-item.item-danger:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+/* ==========================================================
+   NAVEGADOR DE DATA
+   ========================================================== */
 .date-navigator {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.nav-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .nav-arrow {
@@ -69,6 +235,7 @@
   color: #475569;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .nav-arrow:hover {
@@ -81,7 +248,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 250px;
+  text-align: center;
+  flex: 1;
+  max-width: 380px;
+  min-width: 0;
 }
 
 .date-title {
@@ -90,11 +260,16 @@
   color: #0f172a;
   margin: 0;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .date-sub {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 0.82rem;
   color: #64748b;
@@ -108,6 +283,7 @@
   padding: 2px 8px;
   border-radius: 9999px;
   font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .btn-link-today {
@@ -119,23 +295,12 @@
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
+  flex-shrink: 0;
 }
 
 .date-counter {
   color: #64748b;
-}
-
-.calendar-header-title {
-  text-align: center;
-}
-
-/* Canto Superior Direito */
-.header-right {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
+  white-space: nowrap;
 }
 
 /* Botões Genéricos */
@@ -355,12 +520,15 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .reminder-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .reminder-time {
@@ -806,16 +974,20 @@
 }
 
 .calendar-cell {
-  min-height: 80px;
+  min-height: 84px;
   border: 1px solid #f1f5f9;
-  border-radius: 10px;
-  padding: 8px 6px;
+  border-radius: 12px;
+  padding: 8px 4px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
   cursor: pointer;
   background-color: #ffffff;
   transition: all 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .calendar-cell:hover {
@@ -831,34 +1003,37 @@
 .calendar-cell.is-selected {
   border-color: #4f46e5;
   background-color: #f5f3ff;
-  box-shadow: 0 0 0 1px #4f46e5;
+  box-shadow: 0 0 0 1.5px #4f46e5;
 }
 
 .calendar-cell.is-today {
   border-color: #818cf8;
 }
 
-.cell-top {
+.cell-number-wrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  width: 100%;
 }
 
 .cell-day-number {
   font-size: 0.88rem;
   font-weight: 600;
   color: #334155;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  transition: all 0.15s ease;
 }
 
 .today-pill {
   background-color: #4f46e5;
   color: #ffffff !important;
+  font-weight: 700;
 }
 
 .cell-count-badge {
@@ -873,9 +1048,11 @@
 .cell-dots-wrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  margin-top: 6px;
   flex-wrap: wrap;
+  width: 100%;
+  min-height: 10px;
 }
 
 .reminder-dot-indicator {
@@ -883,29 +1060,38 @@
   height: 7px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .dot-plus {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: #64748b;
+  line-height: 1;
 }
 
 /* Painel de Prévia do Dia no Calendário */
 .calendar-day-preview-card {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 18px 20px;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
 }
 
 .preview-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
-  gap: 12px;
+  margin-bottom: 16px;
+  gap: 16px;
   flex-wrap: wrap;
+}
+
+.preview-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .preview-label {
@@ -917,16 +1103,40 @@
 }
 
 .preview-date-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: #0f172a;
   margin: 2px 0 0;
+  letter-spacing: -0.01em;
+}
+
+.preview-task-count {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-top: 2px;
 }
 
 .preview-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.btn-preview-primary {
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.btn-preview-secondary {
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 12px;
 }
 
 .preview-empty {
@@ -986,33 +1196,67 @@
   border-radius: 9999px;
 }
 
-/* Responsividade Mobile */
+/* Responsividade Mobile Focada em Smartphones Modernos (390px - 430px / Dynamic Island) */
 @media (max-width: 640px) {
   .app-header {
-    padding: 10px 12px;
+    padding: max(12px, env(safe-area-inset-top, 12px)) max(14px, env(safe-area-inset-right, 14px)) 10px max(14px, env(safe-area-inset-left, 14px));
   }
 
   .header-container {
     gap: 8px;
+    width: 100%;
+    overflow-x: hidden;
   }
 
-  .btn-text {
-    display: none;
+  .main-content {
+    padding: 16px max(14px, env(safe-area-inset-left, 14px)) max(32px, calc(env(safe-area-inset-bottom, 20px) + 70px)) max(14px, env(safe-area-inset-right, 14px));
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .content-container {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Linha 1: Barra de Ação no Mobile */
+  .header-action-row {
+    gap: 8px;
+  }
+
+  .btn-header-calendar {
+    padding: 7px 12px;
+    font-size: 0.84rem;
+  }
+
+  .btn-header-add {
+    padding: 7px 14px;
+    font-size: 0.84rem;
+  }
+
+  /* Linha 2: Navegação de Data no Mobile */
+  .header-date-row {
+    gap: 6px;
+    padding-top: 0;
   }
 
   .date-title {
-    font-size: 0.95rem;
+    font-size: 1.02rem;
   }
 
   .date-display {
-    min-width: 130px;
+    min-width: 0;
+    max-width: 280px;
   }
 
   .date-sub {
-    font-size: 0.72rem;
+    font-size: 0.74rem;
+    gap: 6px;
   }
 
-  /* Modais como Bottom Sheet no mobile */
+
+
+  /* Modais como Bottom Sheet no Mobile com suporte a Safe Area */
   .modal-backdrop {
     align-items: flex-end;
     padding: 0;
@@ -1025,12 +1269,12 @@
     max-height: 88vh;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    border-top-left-radius: 22px;
-    border-top-right-radius: 22px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     animation: bottomSheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    padding-bottom: env(safe-area-inset-bottom, 16px);
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
   }
 
   @keyframes bottomSheetSlideUp {
@@ -1064,46 +1308,46 @@
     border-radius: 4px;
   }
 
-  /* Calendário Mensal Otimizado para telas de 360px a 430px */
+  /* Calendário Mensal Otimizado (Células mais altas, números centralizados e bolinhas alinhadas) */
   .calendar-grid-card {
-    padding: 8px 3px 12px;
-    border-radius: 12px;
+    padding: 10px 4px 14px;
+    border-radius: 14px;
   }
 
   .calendar-weekdays-row {
-    padding-bottom: 6px;
+    padding-bottom: 8px;
   }
 
   .weekday-header-cell {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 700;
   }
 
   .calendar-days-grid {
-    gap: 2px;
+    gap: 3px;
     margin-top: 6px;
   }
 
   .calendar-cell {
-    min-height: 48px;
-    padding: 4px 2px;
-    border-radius: 6px;
+    min-height: 60px;
+    padding: 6px 2px;
+    border-radius: 8px;
+    gap: 4px;
   }
 
   .cell-day-number {
-    font-size: 0.72rem;
-    width: 18px;
-    height: 18px;
+    font-size: 0.8rem;
+    width: 22px;
+    height: 22px;
   }
 
   .cell-count-badge {
-    font-size: 0.6rem;
-    padding: 0 4px;
+    display: none;
   }
 
   .cell-dots-wrapper {
-    margin-top: 3px;
-    gap: 2px;
+    margin-top: 2px;
+    gap: 3px;
     justify-content: center;
   }
 
@@ -1113,10 +1357,39 @@
   }
 
   .dot-plus {
-    font-size: 0.6rem;
+    font-size: 0.62rem;
   }
 
-  /* Touch targets em botões e navegação */
+  /* Card de Dia Selecionado: Botões Empilhados com Área de Toque HIG (min 44px) */
+  .calendar-day-preview-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .preview-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .preview-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .btn-preview-primary,
+  .btn-preview-secondary {
+    width: 100%;
+    min-height: 46px;
+    font-size: 0.94rem;
+    justify-content: center;
+    border-radius: 12px;
+  }
+
+  /* Touch targets confortáveis em botões e navegação */
   .nav-arrow {
     width: 42px;
     height: 42px;
@@ -1124,16 +1397,8 @@
     min-height: 42px;
   }
 
-  .btn-add,
-  .btn-profile,
-  .btn-logout {
+  .btn-add {
     min-height: 40px;
-    padding: 8px 12px;
-  }
-
-  .btn-text-logout,
-  .btn-text-profile {
-    display: none;
   }
 
   .form-row-2 {
@@ -1155,6 +1420,42 @@
 
   .weekday-select-sub {
     display: none;
+  }
+}
+
+/* ==========================================================
+   BOTÃO FLUTUANTE (FAB) PARA SMARTPHONES (MODO DIÁRIO)
+   ========================================================== */
+.mobile-fab-btn {
+  display: none;
+  position: fixed;
+  right: max(18px, calc(env(safe-area-inset-right, 18px) + 16px));
+  bottom: max(22px, calc(env(safe-area-inset-bottom, 20px) + 16px));
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  min-height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.45), 0 4px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 38;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-fab-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+@media (max-width: 640px) {
+  .mobile-fab-btn {
+    display: flex;
   }
 }
 
